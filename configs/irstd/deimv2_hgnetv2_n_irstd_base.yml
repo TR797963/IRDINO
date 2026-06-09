@@ -1,0 +1,111 @@
+__include__: [
+  '../runtime.yml',
+  '../base/dataloader.yml',
+  '../base/optimizer.yml',
+  '../base/deimv2.yml',
+]
+
+HGNetv2:
+  name: 'B0'
+  return_idx: [2, 3]
+  freeze_at: -1
+  freeze_norm: False
+  use_lab: True
+
+HybridEncoder:
+  in_channels: [512, 1024]
+  feat_strides: [16, 32]
+  hidden_dim: 128
+  use_encoder_idx: [1]
+  dim_feedforward: 512
+  expansion: 0.34
+  depth_mult: 0.5
+  version: 'dfine'
+
+DEIMTransformer:
+  feat_channels: [128, 128]
+  feat_strides: [16, 32]
+  hidden_dim: 128
+  num_levels: 2
+  num_points: [6, 6]
+  num_layers: 3
+  eval_idx: -1
+  dim_feedforward: 512
+
+eval_spatial_size: [512, 512]
+checkpoint_freq: 20
+print_freq: 100
+
+epoches: 68
+lrsheduler: flatcosine
+lr_gamma: 0.5
+warmup_iter: 100
+flat_epoch: 34
+no_aug_epoch: 8
+
+optimizer:
+  type: AdamW
+  params:
+    -
+      params: '^(?=.*backbone)(?!.*norm|bn).*$'
+      lr: 0.0004
+    -
+      params: '^(?=.*backbone)(?=.*norm|bn).*$'
+      lr: 0.0004
+      weight_decay: 0.
+    -
+      params: '^(?=.*(?:encoder|decoder))(?=.*(?:norm|bn|bias)).*$'
+      weight_decay: 0.
+  lr: 0.0008
+  betas: [0.9, 0.999]
+  weight_decay: 0.0001
+
+train_dataloader:
+  total_batch_size: 32
+  num_workers: 4
+  dataset:
+    transforms:
+      ops:
+        - {type: Mosaic, output_size: 256, rotation_range: 10, translation_range: [0.1, 0.1], scaling_range: [0.5, 1.5],
+           probability: 1.0, fill_value: 0, use_cache: True, max_cached_images: 50, random_pop: True}
+        - {type: RandomPhotometricDistort, p: 0.5}
+        - {type: RandomZoomOut, fill: 0}
+        - {type: RandomIoUCrop, p: 0.8}
+        - {type: SanitizeBoundingBoxes, min_size: 1}
+        - {type: RandomHorizontalFlip}
+        - {type: Resize, size: [512, 512]}
+        - {type: SanitizeBoundingBoxes, min_size: 1}
+        - {type: ConvertPILImage, dtype: 'float32', scale: True}
+        - {type: ConvertBoxes, fmt: 'cxcywh', normalize: True}
+      policy:
+        epoch: [4, 34, 60]
+        ops: ['Mosaic', 'RandomPhotometricDistort', 'RandomZoomOut', 'RandomIoUCrop']
+      mosaic_prob: 0.5
+  collate_fn:
+    base_size: 512
+    base_size_repeat: 3
+    stop_epoch: 60
+    mixup_prob: 0.5
+    mixup_epochs: [4, 34]
+    copyblend_prob: 0.5
+    copyblend_epochs: [4, 60]
+    area_threshold: 100
+    num_objects: 3
+    with_expand: True
+    expand_ratios: [0.1, 0.25]
+    ema_restart_decay: 0.9999
+
+val_dataloader:
+  total_batch_size: 32
+  num_workers: 0
+  dataset:
+    transforms:
+      ops:
+        - {type: Resize, size: [512, 512]}
+        - {type: ConvertPILImage, dtype: 'float32', scale: True}
+
+DEIMCriterion:
+  matcher:
+    change_matcher: True
+    iou_order_alpha: 4.0
+    matcher_change_epoch: 50

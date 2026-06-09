@@ -1,0 +1,94 @@
+__include__: [
+  '../dataset_irstd/irdst_detection.yml',
+  '../irstd/deimv2_hgnetv2_n_irstd_base.yml',
+]
+
+output_dir: outputs/irdst
+
+model_name: IRDINO-SMAHE-N
+model_size: N
+use_sftb: true
+sftb_name: SFTB
+use_smahe: true
+smahe_name: SMAHE
+use_smam: true
+smam_name: SMAM
+clip_length: 5
+T: 5
+input_size: 512
+resize: {height: 512, width: 512}
+batch_size: 48
+per_gpu_batch_size: 48
+oom_fallback_batch_size: [32, 24, 16, 8]
+eval_each_epoch: true
+save_best: true
+save_last: true
+best_metric_priority: [F1, AP50, Recall, Precision]
+iou_threshold_for_prf1: 0.5
+metric_style: tridos
+conf_threshold: 0.05
+report_metrics: [AP50, Precision, Recall, F1]
+tuning: weights/deimv2_hgnetv2_n_coco.pth
+DEIM:
+  sftb_adapter: SFTB
+  smahe: SMAHE
+SFTB:
+  in_channels: [128, 128]
+  embed_dim: 32
+  num_target_atoms: 8
+  num_clutter_atoms: 16
+  tau: 0.10
+  softmin_tau: 0.05
+  gate_scale: 0.05
+  pos_weight: 30.0
+  margin_target: 0.05
+  margin_background: 0.05
+  margin_clutter: 0.05
+  mask_expand: 1.5
+  hard_fraction: 0.10
+  easy_fraction: 0.20
+SMAHE:
+  in_channels: [128, 128]
+  embed_dim: 32
+  clip_length: 5
+  T: 5
+  gate_scale: 0.01
+DEIMCriterion:
+  weight_dict: {loss_mal: 1, loss_bbox: 5, loss_giou: 2, loss_fgl: 0.15, loss_ddf: 1.5, loss_sftb_target: 0.05, loss_sftb_background: 0.05, loss_sftb_clutter: 0.10, loss_sftb_calibration: 0.05, loss_sftb_uncertainty: 0.0}
+train_dataloader:
+  shuffle: False
+  total_batch_size: 48
+  num_workers: 4
+  dataset:
+    return_sequence_meta: True
+    transforms:
+      ops:
+        - {type: Resize, size: [512, 512]}
+        - {type: SanitizeBoundingBoxes, min_size: 1}
+        - {type: ConvertPILImage, dtype: 'float32', scale: True}
+        - {type: ConvertBoxes, fmt: 'cxcywh', normalize: True}
+      policy: ~
+      mosaic_prob: 0.0
+  collate_fn:
+    base_size: 512
+    base_size_repeat: ~
+    stop_epoch: 1000
+    mixup_prob: 0.0
+    mixup_epochs: [0, 0]
+    copyblend_prob: 0.0
+    copyblend_epochs: [0, 0]
+val_dataloader:
+  total_batch_size: 48
+  num_workers: 0
+  dataset:
+    return_sequence_meta: True
+    transforms:
+      ops:
+        - {type: Resize, size: [512, 512]}
+        - {type: ConvertPILImage, dtype: 'float32', scale: True}
+eval_spatial_size: [512, 512]
+checkpoint_freq: 1
+epoches: 50
+flat_epoch: 25
+no_aug_epoch: 5
+warmup_iter: 100

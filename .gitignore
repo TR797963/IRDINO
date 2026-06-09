@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+
+# Environment
+.env
+.venv/
+venv/
+conda/
+
+# IDE
+.vscode/
+.idea/
+
+# Data
+datasets/
+data/
+
+# Weights and checkpoints
+weights/
+checkpoints/
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+
+# Outputs
+outputs/
+runs/
+logs/
+wandb/
+tensorboard/
+experiments/
+results/
+visualizations/
+*.log
+
+# System
+.DS_Store
+Thumbs.db
+
+# Large archives
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
