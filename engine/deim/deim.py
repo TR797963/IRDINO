@@ -6,15 +6,17 @@ __all__ = ['DEIM']
 
 @register()
 class DEIM(nn.Module):
-    __inject__ = ['backbone', 'encoder', 'decoder', 'sftb_adapter', 'smahe', 'ctcbp_adapter', 'ctcbp_temporal_adapter']
-    def __init__(self, backbone: nn.Module, encoder: nn.Module, decoder: nn.Module, sftb_adapter: nn.Module=None, smahe: nn.Module=None, ctcbp_adapter: nn.Module=None, ctcbp_temporal_adapter: nn.Module=None, freeze_detector_stats: bool=False):
+    __inject__ = ['backbone', 'encoder', 'decoder', 'sftb_adapter', 'smahe']
+
+    def __init__(self, backbone: nn.Module, encoder: nn.Module, decoder: nn.Module, sftb_adapter: nn.Module=None, smahe: nn.Module=None, freeze_detector_stats: bool=False):
         super().__init__()
         self.backbone = backbone
         self.encoder = encoder
         self.decoder = decoder
-        self.sftb_adapter = sftb_adapter if sftb_adapter is not None else ctcbp_adapter
-        self.smahe = smahe if smahe is not None else ctcbp_temporal_adapter
+        self.sftb_adapter = sftb_adapter
+        self.smahe = smahe
         self.freeze_detector_stats = freeze_detector_stats
+
     def train(self, mode: bool=True):
         super().train(mode)
         if mode and self.freeze_detector_stats:
@@ -23,6 +25,7 @@ class DEIM(nn.Module):
                     if isinstance(layer, nn.modules.batchnorm._BatchNorm):
                         layer.eval()
         return self
+
     def forward(self, x, targets=None):
         x = self.backbone(x)
         x = self.encoder(x)
@@ -47,6 +50,7 @@ class DEIM(nn.Module):
         if diagnostics:
             x['irdino_diagnostics'] = diagnostics
         return x
+
     def deploy(self):
         self.eval()
         for m in self.modules():

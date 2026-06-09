@@ -27,7 +27,7 @@ def _irdino_gradient_stats(model: torch.nn.Module):
     active = 0
     count = 0
     for name, parameter in model.named_parameters():
-        if not any(tag in name for tag in ('sftb', 'smahe', 'smam', 'ctcbp')) or not parameter.requires_grad:
+        if not any(tag in name for tag in ('sftb', 'smahe', 'smam')) or not parameter.requires_grad:
             continue
         count += 1
         if parameter.grad is not None:
@@ -44,7 +44,7 @@ def _irdino_gradient_stats(model: torch.nn.Module):
 
 
 def _irdino_forward_stats(outputs):
-    diagnostics = outputs.get('irdino_diagnostics', outputs.get('ctcbp_diagnostics', {}))
+    diagnostics = outputs.get('irdino_diagnostics', {})
     return {
         f'irdino_{name}': float(value.detach().float().item())
         for name, value in diagnostics.items()

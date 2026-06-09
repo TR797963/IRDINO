@@ -97,7 +97,6 @@ Open-source directory: IRDINO-open
 - `engine/data/transforms/mosaic.py`
 - `engine/deim/__init__.py`
 - `engine/deim/box_ops.py`
-- `engine/deim/ctcbp.py`
 - `engine/deim/deim.py`
 - `engine/deim/deim_criterion.py`
 - `engine/deim/deim_decoder.py`

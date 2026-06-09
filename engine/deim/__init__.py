@@ -21,5 +21,4 @@ from .rtdetrv2_decoder import RTDETRTransformerv2
 from .postprocessor import PostProcessor
 from .deim_criterion import DEIMCriterion
 from .deim_decoder import DEIMTransformer
-from .ctcbp import CTCBPAdapter, CTCBPTemporalAdapter
 from .irdino_modules import SFTB, SMAHE, SMAM

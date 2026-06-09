@@ -272,7 +272,7 @@ class DEIMCriterion(nn.Module):
         """
         outputs_without_aux = {
             k: v for k, v in outputs.items()
-            if 'aux' not in k and not k.startswith(('loss_ctcbp', 'loss_sftb', 'loss_smahe', 'loss_irdino')) and k not in ('ctcbp_diagnostics', 'irdino_diagnostics')
+            if 'aux' not in k and not k.startswith(('loss_sftb', 'loss_smahe', 'loss_irdino')) and k != 'irdino_diagnostics'
         }
 
         # Retrieve the matching between the outputs of the last layer and the targets
@@ -408,7 +408,7 @@ class DEIMCriterion(nn.Module):
         # For debugging Objects365 pre-train.
         losses = {k:torch.nan_to_num(v, nan=0.0) for k, v in losses.items()}
         for name, weight in self.weight_dict.items():
-            if name.startswith(('loss_ctcbp', 'loss_sftb', 'loss_smahe', 'loss_irdino')) and name in outputs:
+            if name.startswith(('loss_sftb', 'loss_smahe', 'loss_irdino')) and name in outputs:
                 losses[name] = torch.nan_to_num(outputs[name], nan=0.0, posinf=0.0, neginf=0.0) * weight
         return losses
 
