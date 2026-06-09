@@ -1,23 +1,8 @@
 # IRDINO
 
-Official implementation of IRDINO for moving infrared small target detection.
+IRDINO: Adapting DINOv3 with Second-Order Motion Awareness for Moving Infrared Small Target Detection
 
-IRDINO adapts a real-time detection pipeline for moving infrared small target detection. The open-source package includes the training and evaluation code, IRDINO configuration templates, dataset checking utilities, and documentation needed to reproduce the experiment workflow.
 
-## Modules
-
-- `SFTB`: spatial fine-tuning branch.
-- `SMAHE`: second-order motion-aware hybrid encoder.
-- `SMAM`: second-order motion-aware module.
-
-## Default Settings
-
-- Clip length: `T=5`
-- Input resize: `512x512`
-- Single-GPU batch size for N configs: `48`
-- OOM fallback batch sizes for N configs: `32`, `24`, `16`, `8`
-- Single-GPU batch size for L configs: `16`
-- Metrics: AP50, Precision, Recall, F1
 
 ## Installation
 
@@ -79,12 +64,6 @@ datasets/
 
 Pretrained weights and trained checkpoints are not included in this repository. Please place downloaded or self-trained weights under `weights/` or specify the checkpoint path in the config.
 
-Expected default paths:
-
-```text
-weights/deimv2_hgnetv2_n_coco.pth
-weights/deimv2_dinov3_l_coco.pth
-```
 
 ## Training
 
@@ -116,31 +95,6 @@ python eval.py -c configs/irdino/irdino_smahe_n_irdst.yml -r path/to/checkpoint.
 python eval.py -c configs/irdino/irdino_smahe_n_daub.yml -r path/to/checkpoint.pth
 ```
 
-## Metrics
-
-We report AP50, Precision, Recall, and F1. Precision/Recall/F1 are computed with IoU=0.5 using one-to-one matching between predictions and ground truths.
-
-Important config keys:
-
-- `T: 5`
-- `input_size: 512`
-- `batch_size`
-- `use_sftb`
-- `use_smahe`
-- `use_smam`
-- `conf_threshold`
-- `iou_threshold_for_prf1`
-
-## Citation
-
-```bibtex
-@article{irdino2026,
-  title={IRDINO: Adapting DINOv3 with Second-Order Motion Awareness for Moving Infrared Small Target Detection},
-  author={...},
-  journal={...},
-  year={2026}
-}
-```
 
 ## License
 
